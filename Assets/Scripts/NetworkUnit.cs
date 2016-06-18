@@ -11,8 +11,8 @@ public class NetworkUnit : NetworkBehaviour {
 	[SyncVar] public float sightRange = 3f;
 
 	// Server Only
-	NetworkUnit currentAttackTarget = null;
-
+	public NetworkUnit currentAttackTarget = null;
+	public LayerMask targetLayer;
 
 	void OnDrawGizmos() {
 		Gizmos.color = Color.red;
@@ -58,6 +58,13 @@ public class NetworkUnit : NetworkBehaviour {
 			} else {
 				// STOP command.
 				// Is there something nearby?
+				currentAttackTarget = IdentifyTarget();
+
+				if (currentAttackTarget != null) {
+					// If I have a target to attack: attack it
+					yield return AttackOrApproachTarget();
+				}
+				// Otherwise, do nothing!
 			}
 
 			// Only do this once a frame.
@@ -71,13 +78,16 @@ public class NetworkUnit : NetworkBehaviour {
 			currentAttackTarget.GetComponent<CircleCollider2D>().radius;
 		if (dist <= attackRange) {
 			// TODO attack here.
-			Debug.Log("Fire!");
-			yield return new WaitForSeconds(1f);
+			yield return Attack();
 		} else if (dist <= sightRange) {
 			MoveToward(currentAttackTarget.transform.position);
 		} else {
 			currentAttackTarget = null;
 		}
+	}
+
+	public virtual IEnumerator Attack() {
+		yield return new WaitForSeconds(1f);
 	}
 
 	private NetworkUnit IdentifyTarget() {
@@ -87,7 +97,7 @@ public class NetworkUnit : NetworkBehaviour {
 			}
 		}
 		// Look for a nearby unit.
-		RaycastHit2D[] hits = Physics2D.CircleCastAll(transform.position, sightRange, Vector3.right, 0f);
+		RaycastHit2D[] hits = Physics2D.CircleCastAll(transform.position, sightRange, Vector3.right, 0f, targetLayer);
 		if (hits.Length > 0) {
 			return hits[0].transform.gameObject.GetComponent<NetworkUnit>();
 		} else {

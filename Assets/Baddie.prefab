@@ -13,7 +13,7 @@ GameObject:
   - 114: {fileID: 11411098}
   - 114: {fileID: 11499586}
   - 58: {fileID: 5807940}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Baddie
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -96,7 +96,10 @@ MonoBehaviour:
   speed: 5
   hp: 0
   attackRange: 1
-  sightRange: 3
+  sightRange: 7
+  targetLayer:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!114 &11499586
 MonoBehaviour:
   m_ObjectHideFlags: 1
