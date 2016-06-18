@@ -25,42 +25,54 @@ public class NetworkUnit : NetworkBehaviour {
 		}
 	}
 
-	void Update() {
-		if (currentCommand.command == UnitCommand.CommandType.MOVE) {
-			// Move command ensures that we have no attack target.
-			currentAttackTarget = null;
+	void Start() {
+		if (isServer) {
+			StartCoroutine(ActionLoop());
+		}
+	}
 
-			// If we finish moving, transition to stop.
-			if (MoveToward(currentCommand.target)) {
-				currentCommand = new UnitCommand(UnitCommand.CommandType.NONE);
-			}
-		} else if (currentCommand.command == UnitCommand.CommandType.ATTACK_MOVE) {
-			// Ensure I can still see my target, and try to find me a new one if not
-			// or I didn't have one to begin with.
-			currentAttackTarget = IdentifyTarget();
+	IEnumerator ActionLoop() {
+		while (true) {
+			if (currentCommand.command == UnitCommand.CommandType.MOVE) {
+				// Move command ensures that we have no attack target.
+				currentAttackTarget = null;
 
-			if (currentAttackTarget != null) {
-				Debug.Log("OK, fight or apprach.");
-				// If I have a target to attack: attack it
-				AttackOrApproachTarget();
-			} else {
-				// Otherwise, move!
+				// If we finish moving, transition to stop.
 				if (MoveToward(currentCommand.target)) {
 					currentCommand = new UnitCommand(UnitCommand.CommandType.NONE);
 				}
+			} else if (currentCommand.command == UnitCommand.CommandType.ATTACK_MOVE) {
+				// Ensure I can still see my target, and try to find me a new one if not
+				// or I didn't have one to begin with.
+				currentAttackTarget = IdentifyTarget();
+
+				if (currentAttackTarget != null) {
+					// If I have a target to attack: attack it
+					yield return AttackOrApproachTarget();
+				} else {
+					// Otherwise, move!
+					if (MoveToward(currentCommand.target)) {
+						currentCommand = new UnitCommand(UnitCommand.CommandType.NONE);
+					}
+				}
+			} else {
+				// STOP command.
+				// Is there something nearby?
 			}
-		} else {
-			// STOP command.
-			// Is there something nearby?
+
+			// Only do this once a frame.
+			yield return new WaitForEndOfFrame();
 		}
 	}
 
 	// return false if we can't see, or no target.
-	private void AttackOrApproachTarget() {
+	private IEnumerator AttackOrApproachTarget() {
 		float dist = Vector3.Distance(currentAttackTarget.transform.position, transform.position) -
 			currentAttackTarget.GetComponent<CircleCollider2D>().radius;
 		if (dist <= attackRange) {
 			// TODO attack here.
+			Debug.Log("Fire!");
+			yield return new WaitForSeconds(1f);
 		} else if (dist <= sightRange) {
 			MoveToward(currentAttackTarget.transform.position);
 		} else {
