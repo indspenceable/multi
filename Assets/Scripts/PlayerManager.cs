@@ -14,6 +14,7 @@ public class PlayerManager : NetworkBehaviour {
 	// UI related bullshit
 	Text hpUiText;
 	Text currentCommandText;
+	Text currentActionText;
 
 
 	// ----------
@@ -26,6 +27,7 @@ public class PlayerManager : NetworkBehaviour {
 	public override void OnStartLocalPlayer() {
 		hpUiText = GameObject.Find("HpText").GetComponent<Text>();
 		currentCommandText = GameObject.Find("CurrentCommand").GetComponent<Text>();
+		currentActionText = GameObject.Find("CurrentAction").GetComponent<Text>();
 		selection = gameObject.AddComponent<UnitSelection>();
 		CmdSpawnHero();
 	}
@@ -105,12 +107,12 @@ public class PlayerManager : NetworkBehaviour {
 	{
 		if (selection.unit) {
 			hpUiText.text = selection.unit.hp + " hp";
+			currentCommandText.text = selection.unit.currentCommand.command.ToString();
 		}
 		if (currentAction != null) {
-			currentCommandText.text = currentAction.name ();
-		}
-		else {
-			currentCommandText.text = "N/A";
+			currentActionText.text = currentAction.name();
+		} else {
+			currentActionText.text = "N/A";
 		}
 	}
 
