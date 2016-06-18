@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine.Networking;
 
 public class NetworkUnit : NetworkBehaviour {
-	[SyncVar] public UnitCommand currentCommand = new UnitCommand(UnitCommand.CommandType.NONE);
+	[SyncVar] public UnitCommand currentCommand = new UnitCommand(UnitCommand.CommandType.STOP);
 	[SyncVar] public float speed = 1;
 	[SyncVar] public int hp;
 
@@ -39,7 +39,7 @@ public class NetworkUnit : NetworkBehaviour {
 
 				// If we finish moving, transition to stop.
 				if (MoveToward(currentCommand.target)) {
-					currentCommand = new UnitCommand(UnitCommand.CommandType.NONE);
+					currentCommand = new UnitCommand(UnitCommand.CommandType.STOP);
 				}
 			} else if (currentCommand.command == UnitCommand.CommandType.ATTACK_MOVE) {
 				// Ensure I can still see my target, and try to find me a new one if not
@@ -52,7 +52,7 @@ public class NetworkUnit : NetworkBehaviour {
 				} else {
 					// Otherwise, move!
 					if (MoveToward(currentCommand.target)) {
-						currentCommand = new UnitCommand(UnitCommand.CommandType.NONE);
+						currentCommand = new UnitCommand(UnitCommand.CommandType.STOP);
 					}
 				}
 			} else {

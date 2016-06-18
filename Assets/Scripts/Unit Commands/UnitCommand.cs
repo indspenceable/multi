@@ -4,7 +4,7 @@ using System.Collections;
 [System.Serializable]
 public struct UnitCommand {
 	public enum CommandType {
-		NONE = 0,
+		STOP = 0,
 		MOVE = 1,
 		ATTACK_MOVE = 2,
 	}
