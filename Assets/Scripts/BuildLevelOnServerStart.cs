@@ -15,5 +15,7 @@ public class BuildLevelOnServerStart : NetworkManager {
 //		GetComponent<LevelBuilder>()
 		GameObject go = Instantiate(baddie, new Vector3(2f,2f), Quaternion.identity) as GameObject;
 		NetworkServer.Spawn(go);
+		go = Instantiate(baddie, new Vector3(-2f,4f), Quaternion.identity) as GameObject;
+		NetworkServer.Spawn(go);
 	}
 }

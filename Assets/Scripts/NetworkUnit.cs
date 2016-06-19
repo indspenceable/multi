@@ -23,6 +23,10 @@ public class NetworkUnit : NetworkBehaviour {
 			Gizmos.color = Color.green;
 			Gizmos.DrawWireSphere(currentAttackTarget.transform.position, 1f);
 		}
+		if (currentCommand.command != UnitCommand.CommandType.STOP) {
+			Gizmos.color = Color.magenta;
+			Gizmos.DrawWireSphere(currentCommand.target, 0.5f);
+		}
 	}
 
 	void Start() {
@@ -78,7 +82,8 @@ public class NetworkUnit : NetworkBehaviour {
 			currentAttackTarget.GetComponent<CircleCollider2D>().radius;
 		if (dist <= attackRange) {
 			// TODO attack here.
-			yield return Attack();
+			FaceTowards(currentAttackTarget.transform.position);
+			yield return Attack(currentAttackTarget);
 		} else if (dist <= sightRange) {
 			MoveToward(currentAttackTarget.transform.position);
 		} else {
@@ -86,8 +91,28 @@ public class NetworkUnit : NetworkBehaviour {
 		}
 	}
 
-	public virtual IEnumerator Attack() {
+	public virtual void takeDamage(int damage) {
+		this.hp -= damage;
+	}
+
+
+
+	public virtual IEnumerator Attack(NetworkUnit target) {
+		GetComponent<Animator>().SetBool("IsAttacking", true);
+		target.takeDamage(1);
 		yield return new WaitForSeconds(1f);
+		GetComponent<Animator>().SetBool("IsAttacking", false);
+	}
+
+
+	public virtual void FaceTowards(Vector3 point) {
+		float x = (point - transform.position).x;
+		RpcSetFlipX(x > 0);
+	}
+
+	[ClientRpc]
+	public void RpcSetFlipX(bool flip) {
+		GetComponent<SpriteRenderer>().flipX = flip;
 	}
 
 	private NetworkUnit IdentifyTarget() {
@@ -107,6 +132,7 @@ public class NetworkUnit : NetworkBehaviour {
 
 	private bool MoveToward(Vector3 target) {
 		Vector3 dist = target - transform.position;
+		FaceTowards(target);
 		if (dist.magnitude > speed*Time.deltaTime) {
 			transform.position += dist.normalized * speed *Time.deltaTime;
 			return false;
