@@ -134,11 +134,17 @@ MonoBehaviour:
   speed: 5
   hp: 100
   attackRange: 1
-  sightRange: 5
+  sightRange: 1
+  currentHealTarget: {fileID: 0}
   currentAttackTarget: {fileID: 0}
-  targetLayer:
+  attackTargetLayers:
     serializedVersion: 2
     m_Bits: 1024
+  healTargetLayers:
+    serializedVersion: 2
+    m_Bits: 512
+  canHeal: 0
+  canAttack: 1
 --- !u!114 &11499586
 MonoBehaviour:
   m_ObjectHideFlags: 1

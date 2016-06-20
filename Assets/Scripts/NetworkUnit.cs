@@ -6,13 +6,18 @@ public class NetworkUnit : NetworkBehaviour {
 	[SyncVar] public UnitCommand currentCommand = new UnitCommand(UnitCommand.CommandType.STOP);
 	[SyncVar] public float speed = 1;
 	[SyncVar] public int hp;
+	public int maxHp;
 
 	[SyncVar] public float attackRange = 1f;
 	[SyncVar] public float sightRange = 3f;
 
 	// Server Only
+	public NetworkUnit currentHealTarget = null;
 	public NetworkUnit currentAttackTarget = null;
-	public LayerMask targetLayer;
+	public LayerMask attackTargetLayers;
+	public LayerMask healTargetLayers;
+	public bool canHeal = false;
+	public bool canAttack = true;
 
 	void OnDrawGizmos() {
 		Gizmos.color = Color.red;
@@ -31,6 +36,7 @@ public class NetworkUnit : NetworkBehaviour {
 
 	void Start() {
 		if (isServer) {
+			hp = maxHp;
 			StartCoroutine(ActionLoop());
 		}
 	}
@@ -48,7 +54,7 @@ public class NetworkUnit : NetworkBehaviour {
 			} else if (currentCommand.command == UnitCommand.CommandType.ATTACK_MOVE) {
 				// Ensure I can still see my target, and try to find me a new one if not
 				// or I didn't have one to begin with.
-				currentAttackTarget = IdentifyTarget();
+				currentAttackTarget = IdentifyTargetToAttack();
 
 				if (currentAttackTarget != null) {
 					// If I have a target to attack: attack it
@@ -60,13 +66,18 @@ public class NetworkUnit : NetworkBehaviour {
 					}
 				}
 			} else {
-				// STOP command.
-				// Is there something nearby?
-				currentAttackTarget = IdentifyTarget();
-
-				if (currentAttackTarget != null) {
-					// If I have a target to attack: attack it
-					yield return AttackOrApproachTarget();
+				if (canHeal) {
+					currentHealTarget = IdentifyTargetToHeal();
+					if (currentHealTarget != null) {
+						// If I have a target to attack: attack it
+						yield return HealOrApproachTarget();
+					}
+				} else if (canAttack) {
+					currentAttackTarget = IdentifyTargetToAttack();
+					if (currentAttackTarget != null) {
+						// If I have a target to attack: attack it
+						yield return AttackOrApproachTarget();
+					}
 				}
 				// Otherwise, do nothing!
 			}
@@ -75,8 +86,7 @@ public class NetworkUnit : NetworkBehaviour {
 			yield return new WaitForEndOfFrame();
 		}
 	}
-
-	// return false if we can't see, or no target.
+		
 	private IEnumerator AttackOrApproachTarget() {
 		float dist = Vector3.Distance(currentAttackTarget.transform.position, transform.position) -
 			currentAttackTarget.GetComponent<CircleCollider2D>().radius;
@@ -91,12 +101,24 @@ public class NetworkUnit : NetworkBehaviour {
 		}
 	}
 
-	public virtual void takeDamage(int damage) {
-		this.hp -= damage;
+	private IEnumerator HealOrApproachTarget() {
+		float dist = Vector3.Distance(currentHealTarget.transform.position, transform.position) -
+			currentHealTarget.GetComponent<CircleCollider2D>().radius;
+		if (dist <= attackRange) {
+			// TODO attack here.
+			FaceTowards(currentHealTarget.transform.position);
+			yield return Heal(currentHealTarget);
+		} else if (dist <= sightRange) {
+			MoveToward(currentHealTarget.transform.position);
+		} else {
+			currentAttackTarget = null;
+		}
 	}
 
-
-
+	public virtual void takeDamage(int damage) {
+		hp = Mathf.Clamp(hp-damage, 0, maxHp);
+	}
+		
 	public virtual IEnumerator Attack(NetworkUnit target) {
 		GetComponent<Animator>().SetBool("IsAttacking", true);
 		target.takeDamage(1);
@@ -104,6 +126,12 @@ public class NetworkUnit : NetworkBehaviour {
 		GetComponent<Animator>().SetBool("IsAttacking", false);
 	}
 
+	public virtual IEnumerator Heal(NetworkUnit target) {
+		GetComponent<Animator>().SetBool("IsHealing", true);
+		target.takeDamage(-1);
+		yield return new WaitForSeconds(5f);
+		GetComponent<Animator>().SetBool("IsHealing", false);
+	}
 
 	public virtual void FaceTowards(Vector3 point) {
 		float x = (point - transform.position).x;
@@ -115,19 +143,35 @@ public class NetworkUnit : NetworkBehaviour {
 		GetComponent<SpriteRenderer>().flipX = flip;
 	}
 
-	private NetworkUnit IdentifyTarget() {
+	private NetworkUnit IdentifyTargetToAttack() {
 		if (currentAttackTarget) {
 			if (Vector3.Distance(currentAttackTarget.transform.position, transform.position) <= sightRange) {
 				return currentAttackTarget;
 			}
 		}
 		// Look for a nearby unit.
-		RaycastHit2D[] hits = Physics2D.CircleCastAll(transform.position, sightRange, Vector3.right, 0f, targetLayer);
+		RaycastHit2D[] hits = Physics2D.CircleCastAll(transform.position, sightRange, Vector3.right, 0f, attackTargetLayers);
 		if (hits.Length > 0) {
 			return hits[0].transform.gameObject.GetComponent<NetworkUnit>();
 		} else {
 			return null;
 		}
+	}
+
+	private NetworkUnit IdentifyTargetToHeal() {
+		if (currentHealTarget) {
+			if (Vector3.Distance(currentHealTarget.transform.position, transform.position) <= sightRange) {
+				return currentAttackTarget;
+			}
+		}
+		// Look for a nearby unit.
+		RaycastHit2D[] hits = Physics2D.CircleCastAll(transform.position, sightRange, Vector3.right, 0f, healTargetLayers);
+		for (int i = 0; i < hits.Length; i++) {
+			if (hits[i].transform.gameObject != gameObject) {
+				return hits[i].transform.gameObject.GetComponent<NetworkUnit>();
+			}
+		}
+		return null;
 	}
 
 	private bool MoveToward(Vector3 target) {
