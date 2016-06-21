@@ -16,8 +16,8 @@ public class BuildLevelOnServerStart : NetworkManager {
 		GameObject go = Instantiate(baddie, new Vector3(2f,2f), Quaternion.identity) as GameObject;
 		NetworkServer.Spawn(go);
 		go = Instantiate(baddie, new Vector3(-2f,4f), Quaternion.identity) as GameObject;
-		go.GetComponent<NetworkUnit>().canAttack = false;
-		go.GetComponent<NetworkUnit>().canHeal = true;
+		go.GetComponent<NetworkUnit>().attackRange = 7;
+		go.GetComponent<NetworkUnit>().sightRange = 9;
 		NetworkServer.Spawn(go);
 	}
 }

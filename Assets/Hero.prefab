@@ -133,8 +133,9 @@ MonoBehaviour:
     target: {x: 0, y: 0, z: 0}
   speed: 5
   hp: 100
+  maxHp: 100
   attackRange: 1
-  sightRange: 1
+  sightRange: 2
   currentHealTarget: {fileID: 0}
   currentAttackTarget: {fileID: 0}
   attackTargetLayers:

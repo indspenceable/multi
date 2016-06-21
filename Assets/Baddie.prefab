@@ -133,6 +133,7 @@ MonoBehaviour:
     target: {x: 0, y: 0, z: 0}
   speed: 1
   hp: 3
+  maxHp: 3
   attackRange: 1
   sightRange: 4
   currentHealTarget: {fileID: 0}

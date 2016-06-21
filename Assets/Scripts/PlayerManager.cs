@@ -7,7 +7,18 @@ using UnityEngine.UI;
 public class PlayerManager : NetworkBehaviour {
 	public GameObject UnitPrefab;
 	[HideInInspector]
-	public UnitSelection selection;
+	private UnitSelection _selection;
+	public UnitSelection selection {
+		get {
+			if (isLocalPlayer) {
+				if (_selection == null) {
+					_selection = gameObject.AddComponent<UnitSelection>();
+				}
+				return _selection;
+			}
+			return null;
+		}
+	}
 	[HideInInspector]
 	public PlayerAction currentAction;
 
@@ -28,7 +39,6 @@ public class PlayerManager : NetworkBehaviour {
 		hpUiText = GameObject.Find("HpText").GetComponent<Text>();
 		currentCommandText = GameObject.Find("CurrentCommand").GetComponent<Text>();
 		currentActionText = GameObject.Find("CurrentAction").GetComponent<Text>();
-		selection = gameObject.AddComponent<UnitSelection>();
 		CmdSpawnHero();
 	}
 
