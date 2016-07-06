@@ -1,0 +1,17 @@
+/Users/dspencer/dev/mv/Temp/bin/Release/Assembly-CSharp.dll.mdb
+/Users/dspencer/dev/mv/Temp/bin/Release/Assembly-CSharp.dll
+/Users/dspencer/dev/mv/obj/Release/Assembly-CSharp.dll
+/Users/dspencer/dev/mv/obj/Release/Assembly-CSharp.dll.mdb
+/Users/dspencer/dev/mv/Temp/bin/Release/UnityEngine.dll
+/Users/dspencer/dev/mv/Temp/bin/Release/UnityEditor.dll
+/Users/dspencer/dev/mv/Temp/bin/Release/UnityEngine.UI.dll
+/Users/dspencer/dev/mv/Temp/bin/Release/UnityEngine.Networking.dll
+/Users/dspencer/dev/mv/Temp/bin/Release/Mono.Cecil.dll
+/Users/dspencer/dev/mv/Temp/bin/Release/Unity.SerializationLogic.dll
+/Users/dspencer/dev/mv/Temp/bin/Release/Unity.DataContract.dll
+/Users/dspencer/dev/mv/Temp/bin/Release/ICSharpCode.NRefactory.dll
+/Users/dspencer/dev/mv/Temp/bin/Release/Unity.UNetWeaver.dll
+/Users/dspencer/dev/mv/Temp/bin/Release/Unity.UNetWeaver.dll.mdb
+/Users/dspencer/dev/mv/Temp/bin/Release/Unity.CecilTools.dll
+/Users/dspencer/dev/mv/Temp/bin/Release/Mono.Cecil.Pdb.dll
+/Users/dspencer/dev/mv/Temp/bin/Release/Mono.Cecil.Mdb.dll
